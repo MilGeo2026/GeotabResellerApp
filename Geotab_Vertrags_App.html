@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Geotab Reseller – Kunden & Verträge</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --blue-dark: #003366;
@@ -193,6 +194,27 @@
 </head>
 <body>
 
+<!-- ══ AUTH SCREEN (Login / Registrierung) ══ -->
+<div id="auth-screen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#F0F4F8;padding:20px;">
+  <div class="card" style="width:100%;max-width:380px;padding:32px;">
+    <h1 style="font-size:18px;color:var(--blue-dark);margin-bottom:4px;">🌐 Geotab CRM</h1>
+    <p style="color:var(--gray);font-size:13px;margin-bottom:20px;">Reseller Portal – Anmeldung</p>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label>E-Mail</label>
+      <input id="auth-email" type="email" placeholder="name@firma.de">
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>Passwort</label>
+      <input id="auth-password" type="password" placeholder="Mindestens 6 Zeichen">
+    </div>
+    <div id="auth-error" style="display:none;color:var(--red);font-size:12px;margin-bottom:10px;"></div>
+    <div id="auth-info"  style="display:none;color:var(--green);font-size:12px;margin-bottom:10px;"></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="handleLogin()">Anmelden</button>
+    <button class="btn btn-secondary" style="width:100%;justify-content:center;" onclick="handleSignUp()">Neu registrieren</button>
+  </div>
+</div>
+
+<div id="app-root" style="display:none">
 <div class="layout">
 
   <!-- ══ SIDEBAR ══ -->
@@ -215,7 +237,13 @@
         Verträge
       </div>
     </nav>
-    <div class="sidebar-footer">v1.0 · Geotab Reseller CRM</div>
+    <div class="sidebar-footer">
+      <div id="user-email" style="color:rgba(255,255,255,.6);margin-bottom:8px;word-break:break-all;"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <span>v1.0 · Geotab Reseller CRM</span>
+        <button class="btn btn-secondary btn-sm" onclick="handleLogout()" style="padding:3px 8px;">Logout</button>
+      </div>
+    </div>
   </aside>
 
   <!-- ══ MAIN ══ -->
@@ -363,7 +391,7 @@
 
     </div><!-- /content -->
   </div><!-- /main -->
-</div><!-- /layout -->
+</div><!-- /layout --></div><!-- /app-root -->
 
 
 <!-- ══ MODAL: NEUER KUNDE ══ -->
@@ -503,19 +531,78 @@
 
 <script>
 // ══════════════════════════════════════════════════
-//  DATA STORE  (localStorage für Persistenz)
+//  SUPABASE  (zentrale Datenbank – für alle Browser/Geräte erreichbar)
 // ══════════════════════════════════════════════════
-let kunden   = JSON.parse(localStorage.getItem('gtb_kunden')   || '[]');
-let vertraege= JSON.parse(localStorage.getItem('gtb_vertraege')|| '[]');
+const SUPABASE_URL = 'https://kuzvtbikcmjncymambmf.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_cllDeAanVYdiRtzGDkCZaw_zQZQT3TG';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let kunden   = [];
+let vertraege= [];
 let editingKundeId   = null;
 let editingVertragId = null;
 
-function save() {
-  localStorage.setItem('gtb_kunden',    JSON.stringify(kunden));
-  localStorage.setItem('gtb_vertraege', JSON.stringify(vertraege));
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ── Auth ──
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-root').style.display = '';
+}
+function showAuthScreen() {
+  document.getElementById('app-root').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+function authMessage(msg, isError = true) {
+  const errEl = document.getElementById('auth-error');
+  const infoEl = document.getElementById('auth-info');
+  errEl.style.display = 'none'; infoEl.style.display = 'none';
+  const el = isError ? errEl : infoEl;
+  el.textContent = msg; el.style.display = 'block';
 }
 
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+async function handleSignUp() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!email || password.length < 6) { authMessage('Bitte E-Mail und ein Passwort mit min. 6 Zeichen angeben.'); return; }
+  const { error } = await sb.auth.signUp({ email, password });
+  if (error) { authMessage(error.message); return; }
+  authMessage('Registrierung erfolgreich! Falls E-Mail-Bestätigung aktiv ist, bitte Posteingang prüfen und danach anmelden.', false);
+}
+
+async function handleLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!email || !password) { authMessage('Bitte E-Mail und Passwort angeben.'); return; }
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { authMessage(error.message); return; }
+}
+
+async function handleLogout() {
+  await sb.auth.signOut();
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    document.getElementById('user-email').textContent = session.user.email;
+    showApp();
+    loadData();
+  } else {
+    showAuthScreen();
+  }
+});
+
+// ── Daten laden ──
+async function loadData() {
+  const [{ data: kRows, error: kErr }, { data: vRows, error: vErr }] = await Promise.all([
+    sb.from('kunden').select('*').order('created_at'),
+    sb.from('vertraege').select('*').order('created_at'),
+  ]);
+  if (kErr || vErr) { alert('Fehler beim Laden der Daten: ' + (kErr?.message || vErr?.message)); return; }
+  kunden    = (kRows || []).map(r => ({ id: r.id, ...r.data }));
+  vertraege = (vRows || []).map(r => ({ id: r.id, ...r.data }));
+  refreshAll();
+}
 
 // ══════════════════════════════════════════════════
 //  NAVIGATION
@@ -572,7 +659,7 @@ function openKundeModal(id = null) {
   openModal('modal-kunde');
 }
 
-function saveKunde() {
+async function saveKunde() {
   const firma = document.getElementById('k-firma').value.trim();
   const name  = document.getElementById('k-name').value.trim();
   const email = document.getElementById('k-email').value.trim();
@@ -592,17 +679,24 @@ function saveKunde() {
   };
   if (editingKundeId) {
     const idx = kunden.findIndex(x => x.id === editingKundeId);
-    kunden[idx] = { ...kunden[idx], ...data };
+    const merged = { ...kunden[idx], ...data };
+    const { error } = await sb.from('kunden').update({ data: merged }).eq('id', editingKundeId);
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return; }
+    kunden[idx] = { id: editingKundeId, ...merged };
   } else {
-    kunden.push({ id: uid(), ...data });
+    const { data: inserted, error } = await sb.from('kunden').insert({ data }).select().single();
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return; }
+    kunden.push({ id: inserted.id, ...data });
   }
-  save(); closeModal('modal-kunde'); refreshAll();
+  closeModal('modal-kunde'); refreshAll();
 }
 
-function deleteKunde(id) {
+async function deleteKunde(id) {
   if (!confirm('Kunden wirklich löschen? Verknüpfte Verträge bleiben erhalten.')) return;
+  const { error } = await sb.from('kunden').delete().eq('id', id);
+  if (error) { alert('Fehler beim Löschen: ' + error.message); return; }
   kunden = kunden.filter(k => k.id !== id);
-  save(); refreshAll();
+  refreshAll();
 }
 
 function renderKunden(filter = '') {
@@ -778,7 +872,7 @@ function updateTotal() {
   if (rcHint)    rcHint.style.display    = mwst ? 'none' : '';
 }
 
-function saveVertrag() {
+async function saveVertrag() {
   const kundeId = document.getElementById('v-kunde').value;
   const beginn  = document.getElementById('v-beginn').value;
   const ende    = document.getElementById('v-ende').value;
@@ -803,18 +897,26 @@ function saveVertrag() {
   };
   if (editingVertragId) {
     const idx = vertraege.findIndex(x => x.id === editingVertragId);
-    vertraege[idx] = { ...vertraege[idx], ...data };
+    const merged = { ...vertraege[idx], ...data };
+    const { error } = await sb.from('vertraege').update({ data: merged }).eq('id', editingVertragId);
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return; }
+    vertraege[idx] = { id: editingVertragId, ...merged };
   } else {
     const nr = 'GT-' + new Date().getFullYear() + '-' + String(vertraege.length+1).padStart(3,'0');
-    vertraege.push({ id: uid(), nr, ...data });
+    const payload = { nr, ...data };
+    const { data: inserted, error } = await sb.from('vertraege').insert({ data: payload }).select().single();
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return; }
+    vertraege.push({ id: inserted.id, ...payload });
   }
-  save(); closeModal('modal-vertrag'); refreshAll();
+  closeModal('modal-vertrag'); refreshAll();
 }
 
-function deleteVertrag(id) {
+async function deleteVertrag(id) {
   if (!confirm('Vertrag wirklich löschen?')) return;
+  const { error } = await sb.from('vertraege').delete().eq('id', id);
+  if (error) { alert('Fehler beim Löschen: ' + error.message); return; }
   vertraege = vertraege.filter(v => v.id !== id);
-  save(); refreshAll();
+  refreshAll();
 }
 
 function renderVertraege(filter = '') {
@@ -1216,8 +1318,7 @@ function refreshAll() {
   renderVertraege();
 }
 
-// ── init
-refreshAll();
+// ── init: Datenladen erfolgt nach erfolgreichem Login über onAuthStateChange → loadData()
 </script>
 </body>
 </html>
