@@ -175,13 +175,13 @@
                    text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
 
   /* ── Checkboxes (products) ── */
-  .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .checkbox-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px;
+  .checkbox-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  .checkbox-item { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 7px 10px;
                    border: 1px solid var(--border); border-radius: 7px; cursor: pointer;
                    transition: all .15s; }
   .checkbox-item:hover { border-color: var(--blue-acc); background: var(--blue-light); }
   .checkbox-item input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--blue-mid); flex-shrink:0; }
-  .checkbox-item span { font-size: 13px; flex: 1; }
+  .checkbox-item span { font-size: 13px; flex: 1; min-width: 140px; }
   .qty-wrap { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
   .qty-wrap label { font-size: 11px; color: var(--gray); white-space: nowrap; cursor: default; }
   .qty-input { width: 52px !important; padding: 3px 6px !important; font-size: 12px !important;
