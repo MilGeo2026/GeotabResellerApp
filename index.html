@@ -1118,9 +1118,52 @@ function showDetail(id) {
         </tfoot>
       </table>
     </div>
+    <div class="section-label" style="margin-top:16px">Unterschriebener Vertrag</div>
+    ${v.dokumentPfad ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--gray-light)">
+        <span style="font-size:13px">📄 ${esc(v.dokumentName||'Dokument')}</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-secondary btn-sm" onclick="ladeVertragDatei('${esc(v.dokumentPfad)}')">Herunterladen</button>
+          <label class="btn btn-secondary btn-sm" style="cursor:pointer;margin:0">Ersetzen
+            <input type="file" id="upload-datei-input" style="display:none" onchange="uploadVertragDatei('${id}')">
+          </label>
+        </div>
+      </div>
+    ` : `
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px dashed var(--border);border-radius:8px">
+        <input type="file" id="upload-datei-input" style="flex:1">
+        <button class="btn btn-primary btn-sm" onclick="uploadVertragDatei('${id}')">Hochladen</button>
+      </div>
+    `}
   `;
   document.getElementById('detail-pdf-btn').onclick = () => generatePDF(id);
   openModal('modal-detail');
+}
+
+// ══════════════════════════════════════════════════
+//  UNTERSCHRIEBENER VERTRAG (Datei-Upload)
+// ══════════════════════════════════════════════════
+const DOKUMENTE_BUCKET = 'vertraege-dokumente';
+
+async function uploadVertragDatei(vertragId) {
+  const input = document.getElementById('upload-datei-input');
+  const file = input.files[0];
+  if (!file) { alert('Bitte zuerst eine Datei auswählen.'); return; }
+  const path = `${vertragId}/${Date.now()}_${file.name}`;
+  const { error: uploadError } = await sb.storage.from(DOKUMENTE_BUCKET).upload(path, file, { upsert: true });
+  if (uploadError) { alert('Fehler beim Hochladen: ' + uploadError.message); return; }
+  const idx = vertraege.findIndex(x => x.id === vertragId);
+  const merged = { ...vertraege[idx], dokumentPfad: path, dokumentName: file.name };
+  const { error: updateError } = await sb.from('vertraege').update({ data: merged }).eq('id', vertragId);
+  if (updateError) { alert('Fehler beim Speichern: ' + updateError.message); return; }
+  vertraege[idx] = { id: vertragId, ...merged };
+  showDetail(vertragId);
+}
+
+async function ladeVertragDatei(pfad) {
+  const { data, error } = await sb.storage.from(DOKUMENTE_BUCKET).createSignedUrl(pfad, 60);
+  if (error) { alert('Fehler beim Laden der Datei: ' + error.message); return; }
+  window.open(data.signedUrl, '_blank');
 }
 
 // ══════════════════════════════════════════════════
@@ -1322,31 +1365,22 @@ function generatePDF(vertragId) {
   doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(0,51,102);
   doc.text('VERTRAGSUNTERZEICHNUNG', ml, y); y += 4;
   doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(80,80,80);
-  doc.text('Mit ihrer Unterschrift erkennen beide Parteien den Inhalt dieses Vertrages verbindlich an.', ml, y);
+  doc.text('Mit ihrer Unterschrift erkennt der Kunde den Inhalt dieses Vertrages verbindlich an.', ml, y);
   y += 10;
 
-  // sig block
-  const colW = (mr-ml-10)/2;
-  const x2 = ml + colW + 10;
-  ['Reseller (Auftragnehmer)', 'Kunde / Partner (Auftraggeber)'].forEach((lbl, i) => {
-    const x = i===0 ? ml : x2;
-    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(0,51,102);
-    doc.text(lbl, x, y);
-  });
+  // sig block (nur Kunde/Partner)
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(0,51,102);
+  doc.text('Kunde / Partner (Auftraggeber)', ml, y);
   y += 14;
-  [ml, x2].forEach(x => {
-    doc.setDrawColor(0,51,102); doc.setLineWidth(0.4);
-    doc.line(x, y, x+colW, y);
-    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(120,120,120);
-    doc.text('Ort, Datum', x, y+4);
-  });
+  doc.setDrawColor(0,51,102); doc.setLineWidth(0.4);
+  doc.line(ml, y, mr, y);
+  doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(120,120,120);
+  doc.text('Ort, Datum', ml, y+4);
   y += 18;
-  [ml, x2].forEach(x => {
-    doc.setDrawColor(0,51,102); doc.setLineWidth(0.4);
-    doc.line(x, y, x+colW, y);
-    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(120,120,120);
-    doc.text('Unterschrift & Stempel', x, y+4);
-  });
+  doc.setDrawColor(0,51,102); doc.setLineWidth(0.4);
+  doc.line(ml, y, mr, y);
+  doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(120,120,120);
+  doc.text('Unterschrift & Stempel', ml, y+4);
 
   // ── footer on all pages
   const total = doc.internal.getNumberOfPages();
