@@ -115,13 +115,22 @@
   /* ── Table ── */
   .table-wrap { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; }
+  table.table-fixed { table-layout: fixed; }
+  table.table-fixed th, table.table-fixed td { overflow-wrap: anywhere; word-break: break-word; }
+  .vertraege-table th:nth-child(1), .vertraege-table td:nth-child(1),
+  .vertraege-table th:nth-child(4), .vertraege-table td:nth-child(4),
+  .vertraege-table th:nth-child(5), .vertraege-table td:nth-child(5),
+  .vertraege-table th:nth-child(6), .vertraege-table td:nth-child(6),
+  .vertraege-table th:nth-child(7), .vertraege-table td:nth-child(7) {
+    white-space: nowrap;
+  }
   th { background: var(--gray-light); padding: 10px 14px; text-align: left;
        font-size: 12px; font-weight: 600; color: var(--gray); text-transform: uppercase;
        letter-spacing: .04em; border-bottom: 1px solid var(--border); }
   td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #F9FAFB; }
-  .td-actions { display: flex; gap: 6px; }
+  .td-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
   /* ── Status badges ── */
   .status { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px;
@@ -408,16 +417,16 @@
             </div>
           </div>
           <div class="table-wrap">
-            <table>
+            <table class="table-fixed">
               <thead>
                 <tr>
-                  <th>Unternehmen</th>
-                  <th>Ansprechpartner</th>
-                  <th>E-Mail</th>
-                  <th>Telefon</th>
-                  <th>Ort</th>
-                  <th>Verträge</th>
-                  <th>Aktionen</th>
+                  <th style="width:18%">Unternehmen</th>
+                  <th style="width:15%">Ansprechpartner</th>
+                  <th style="width:19%">E-Mail</th>
+                  <th style="width:12%">Telefon</th>
+                  <th style="width:15%">Ort</th>
+                  <th style="width:8%">Verträge</th>
+                  <th style="width:13%">Aktionen</th>
                 </tr>
               </thead>
               <tbody id="kunden-tbody"></tbody>
@@ -437,17 +446,17 @@
             </div>
           </div>
           <div class="table-wrap">
-            <table>
+            <table class="table-fixed vertraege-table">
               <thead>
                 <tr>
-                  <th>Vertrag-Nr.</th>
-                  <th>Kunde</th>
-                  <th>Produkte</th>
-                  <th>Beginn</th>
-                  <th>Ende</th>
-                  <th>Status</th>
-                  <th>Wert/Jahr</th>
-                  <th>Aktionen</th>
+                  <th style="width:10%">Vertrag-Nr.</th>
+                  <th style="width:14%">Kunde</th>
+                  <th style="width:22%">Produkte</th>
+                  <th style="width:10%">Beginn</th>
+                  <th style="width:10%">Ende</th>
+                  <th style="width:11%">Status</th>
+                  <th style="width:10%">Wert/Jahr</th>
+                  <th style="width:13%">Aktionen</th>
                 </tr>
               </thead>
               <tbody id="vertraege-tbody"></tbody>
@@ -883,10 +892,6 @@ function openVertragModal(id = null) {
       document.getElementById('v-ende').value     = v.ende;
       document.getElementById('v-status').value   = v.status;
       document.getElementById('v-zahlung').value  = v.zahlung||14;
-      document.getElementById('v-hardware').value = v.hardware||0;
-      document.getElementById('v-lizenz').value   = v.lizenz||0;
-      document.getElementById('v-install').value  = v.install||0;
-      document.getElementById('v-support').value  = v.supportPreis||0;
       document.getElementById('v-sonstiges').value= v.sonstiges||0;
       document.getElementById('v-notiz').value    = v.notiz||'';
       (v.produkte||[]).forEach(item => {
@@ -1038,7 +1043,7 @@ function renderVertraege(filter = '') {
     return `<tr>
       <td><strong>${esc(v.nr)}</strong></td>
       <td>${esc(firmaName)}</td>
-      <td style="max-width:180px;white-space:normal;font-size:12px">${pLabels.slice(0,3).map(l=>`<span style="background:var(--blue-light);color:var(--blue-mid);border-radius:4px;padding:1px 6px;margin:1px;display:inline-block">${esc(l)}</span>`).join('')}${pLabels.length>3?`<span style="color:var(--gray);font-size:11px"> +${pLabels.length-3}</span>`:''}</td>
+      <td style="font-size:12px">${pLabels.slice(0,3).map(l=>`<span style="background:var(--blue-light);color:var(--blue-mid);border-radius:4px;padding:1px 6px;margin:1px;display:inline-block">${esc(l)}</span>`).join('')}${pLabels.length>3?`<span style="color:var(--gray);font-size:11px"> +${pLabels.length-3}</span>`:''}</td>
       <td>${fmtDate(v.beginn)}</td>
       <td>${fmtDate(v.ende)}</td>
       <td><span class="status ${stClass}"><span class="status-dot"></span>${stLabel}</span></td>
