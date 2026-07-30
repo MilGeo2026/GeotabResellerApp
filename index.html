@@ -1153,11 +1153,12 @@ async function uploadVertragDatei(vertragId) {
   const { error: uploadError } = await sb.storage.from(DOKUMENTE_BUCKET).upload(path, file, { upsert: true });
   if (uploadError) { alert('Fehler beim Hochladen: ' + uploadError.message); return; }
   const idx = vertraege.findIndex(x => x.id === vertragId);
-  const merged = { ...vertraege[idx], dokumentPfad: path, dokumentName: file.name };
+  const merged = { ...vertraege[idx], dokumentPfad: path, dokumentName: file.name, status: 'aktiv' };
   const { error: updateError } = await sb.from('vertraege').update({ data: merged }).eq('id', vertragId);
   if (updateError) { alert('Fehler beim Speichern: ' + updateError.message); return; }
   vertraege[idx] = { id: vertragId, ...merged };
   showDetail(vertragId);
+  refreshAll();
 }
 
 async function ladeVertragDatei(pfad) {
