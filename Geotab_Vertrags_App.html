@@ -1181,13 +1181,9 @@ function renderVertraege(filter = '') {
 // ══════════════════════════════════════════════════
 const UMFRAGE_SCALE_LABELS = {
   gesamtzufriedenheit: 'Gesamtzufriedenheit',
-  hardware_zuverlaessigkeit: 'Zuverlässigkeit Hardware',
-  installation: 'Installation & Inbetriebnahme',
   mygeotab_bedienung: 'Bedienbarkeit MyGeotab',
   support_reaktionszeit: 'Reaktionszeit Support',
   support_kompetenz: 'Kompetenz Support',
-  vertrag_verstaendlich: 'Verständlichkeit Vertrag/Rechnung',
-  erreichbarkeit: 'Erreichbarkeit',
 };
 
 function renderUmfrageAntworten(filter = '') {
@@ -1254,6 +1250,7 @@ function showUmfrageDetail(id) {
       <div class="form-group full"><label>Nutzung mobile App (Geotab Drive)</label><p>${esc(a.app_nutzung || '–')}</p></div>
       <div class="form-group full"><label>Meistgenutzte Funktionen</label><p>${list(a.funktionen)}</p></div>
       <div class="form-group full"><label>Interesse an Zusatzleistungen</label><p>${list(a.zusatzleistungen)}</p></div>
+      <div class="form-group full"><label>Sucht aktuell noch Lösung für</label><p>${esc(a.loesungssuche) || '<span style="color:var(--gray)">– keine Angabe –</span>'}</p></div>
       <div class="form-group full"><label>Feedback / Anmerkungen</label><p>${esc(a.freitext) || '<span style="color:var(--gray)">– keine Angabe –</span>'}</p></div>
       <div class="form-group full"><label>Kontakt</label>
         <p>${esc(a.kontakt_firma) || '–'}${a.kontakt_name?' · '+esc(a.kontakt_name):''}${a.kontakt_email?' · '+esc(a.kontakt_email):''}</p>
