@@ -334,8 +334,8 @@
       <svg width="28" height="28" fill="none" stroke="#16A34A" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
     </div>
     <h2>Vielen Dank für Ihr Feedback!</h2>
-    <p>Ihre Antworten wurden zum Versand an unser E-Mail-Programm übergeben. Falls sich kein E-Mail-Fenster geöffnet hat, nutzen Sie bitte die Kopier-Funktion unten und senden Sie den Text an <strong>info@millennium-fleet.de</strong>.</p>
-    <div class="fallback show" id="fallback-box">
+    <p id="thanks-text">Ihre Antworten wurden übermittelt.</p>
+    <div class="fallback" id="fallback-box">
       <p class="hint">Antworten als Text (zum manuellen Versand):</p>
       <textarea id="fallback-text" readonly></textarea>
       <div class="copy-row">
@@ -350,51 +350,63 @@
 
 <script>
 const SURVEY_EMAIL = 'info@millennium-fleet.de';
+const SUPABASE_URL = 'https://kuzvtbikcmjncymambmf.supabase.co';
+const SUPABASE_KEY  = 'sb_publishable_cllDeAanVYdiRtzGDkCZaw_zQZQT3TG';
 let lastMailto = '';
 
-function collectAnswers() {
+function buildAnswers() {
   const form = document.getElementById('survey-form');
-  const scaleLabels = {
-    gesamtzufriedenheit: 'Gesamtzufriedenheit (1-5)',
-    hardware_zuverlaessigkeit: 'Zuverlässigkeit der Hardware (1-5)',
-    installation: 'Installation & Inbetriebnahme (1-5)',
-    mygeotab_bedienung: 'Bedienbarkeit MyGeotab (1-5)',
-    support_reaktionszeit: 'Reaktionszeit Support (1-5)',
-    support_kompetenz: 'Kompetenz Support (1-5)',
-    vertrag_verstaendlich: 'Verständlichkeit Vertrag/Rechnung (1-5)',
-    erreichbarkeit: 'Erreichbarkeit (1-5)',
-    nps: 'Weiterempfehlung (0-10)',
+  const val = name => { const el = form.querySelector(`input[name="${name}"]:checked`); return el ? Number(el.value) : null; };
+  const checked = name => [...form.querySelectorAll(`input[name="${name}"]:checked`)].map(i => i.value);
+  const appEl = form.querySelector('input[name="app_nutzung"]:checked');
+
+  return {
+    gesamtzufriedenheit: val('gesamtzufriedenheit'),
+    hardware_zuverlaessigkeit: val('hardware_zuverlaessigkeit'),
+    installation: val('installation'),
+    mygeotab_bedienung: val('mygeotab_bedienung'),
+    app_nutzung: appEl ? appEl.value : null,
+    funktionen: checked('funktionen'),
+    support_reaktionszeit: val('support_reaktionszeit'),
+    support_kompetenz: val('support_kompetenz'),
+    vertrag_verstaendlich: val('vertrag_verstaendlich'),
+    erreichbarkeit: val('erreichbarkeit'),
+    zusatzleistungen: checked('zusatzleistungen'),
+    nps: val('nps'),
+    freitext: document.getElementById('freitext').value.trim(),
+    kontakt_firma: document.getElementById('kontakt-firma').value.trim(),
+    kontakt_name: document.getElementById('kontakt-name').value.trim(),
+    kontakt_email: document.getElementById('kontakt-email').value.trim(),
   };
+}
+
+function answersToText(a) {
+  const na = '– keine Angabe –';
   const lines = ['Kundenumfrage – MillenniumFleet', '================================', ''];
-
-  for (const [name, label] of Object.entries(scaleLabels)) {
-    const el = form.querySelector(`input[name="${name}"]:checked`);
-    lines.push(`${label}: ${el ? el.value : '– keine Angabe –'}`);
-  }
-
-  const appNutzung = form.querySelector('input[name="app_nutzung"]:checked');
-  lines.push(`Nutzung mobile App (Geotab Drive): ${appNutzung ? appNutzung.value : '– keine Angabe –'}`);
-
-  const funktionen = [...form.querySelectorAll('input[name="funktionen"]:checked')].map(i => i.value);
-  lines.push(`Meistgenutzte Funktionen: ${funktionen.length ? funktionen.join(', ') : '– keine Angabe –'}`);
-
-  const zusatz = [...form.querySelectorAll('input[name="zusatzleistungen"]:checked')].map(i => i.value);
-  lines.push(`Interesse an Zusatzleistungen: ${zusatz.length ? zusatz.join(', ') : '– keine Angabe –'}`);
-
+  lines.push(`Gesamtzufriedenheit (1-5): ${a.gesamtzufriedenheit ?? na}`);
+  lines.push(`Zuverlässigkeit der Hardware (1-5): ${a.hardware_zuverlaessigkeit ?? na}`);
+  lines.push(`Installation & Inbetriebnahme (1-5): ${a.installation ?? na}`);
+  lines.push(`Bedienbarkeit MyGeotab (1-5): ${a.mygeotab_bedienung ?? na}`);
+  lines.push(`Nutzung mobile App (Geotab Drive): ${a.app_nutzung ?? na}`);
+  lines.push(`Meistgenutzte Funktionen: ${a.funktionen.length ? a.funktionen.join(', ') : na}`);
+  lines.push(`Reaktionszeit Support (1-5): ${a.support_reaktionszeit ?? na}`);
+  lines.push(`Kompetenz Support (1-5): ${a.support_kompetenz ?? na}`);
+  lines.push(`Verständlichkeit Vertrag/Rechnung (1-5): ${a.vertrag_verstaendlich ?? na}`);
+  lines.push(`Erreichbarkeit (1-5): ${a.erreichbarkeit ?? na}`);
+  lines.push(`Interesse an Zusatzleistungen: ${a.zusatzleistungen.length ? a.zusatzleistungen.join(', ') : na}`);
+  lines.push(`Weiterempfehlung (0-10): ${a.nps ?? na}`);
   lines.push('');
   lines.push('Feedback / Anmerkungen:');
-  lines.push(document.getElementById('freitext').value.trim() || '– keine Angabe –');
-
+  lines.push(a.freitext || na);
   lines.push('');
   lines.push('Kontaktdaten (optional):');
-  lines.push(`Unternehmen: ${document.getElementById('kontakt-firma').value.trim() || '–'}`);
-  lines.push(`Ansprechpartner: ${document.getElementById('kontakt-name').value.trim() || '–'}`);
-  lines.push(`E-Mail: ${document.getElementById('kontakt-email').value.trim() || '–'}`);
-
+  lines.push(`Unternehmen: ${a.kontakt_firma || '–'}`);
+  lines.push(`Ansprechpartner: ${a.kontakt_name || '–'}`);
+  lines.push(`E-Mail: ${a.kontakt_email || '–'}`);
   return lines.join('\n');
 }
 
-function submitSurvey(evt) {
+async function submitSurvey(evt) {
   evt.preventDefault();
   const form = document.getElementById('survey-form');
 
@@ -408,15 +420,43 @@ function submitSurvey(evt) {
     }
   }
 
-  const body = collectAnswers();
-  const subject = 'Kundenumfrage – Rückmeldung';
-  lastMailto = `mailto:${SURVEY_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const submitBtn = form.querySelector('.btn-submit');
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Wird gesendet …';
+
+  const answers = buildAnswers();
+  const text = answersToText(answers);
+  let savedDirectly = false;
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/umfrage_antworten`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal',
+      },
+      body: JSON.stringify({ data: answers }),
+    });
+    savedDirectly = res.ok;
+  } catch (e) {
+    savedDirectly = false;
+  }
 
   document.getElementById('survey-view').style.display = 'none';
   document.getElementById('thanks').style.display = 'block';
-  document.getElementById('fallback-text').value = body;
 
-  window.location.href = lastMailto;
+  if (savedDirectly) {
+    document.getElementById('thanks-text').textContent = 'Ihre Antworten wurden direkt an MillenniumFleet übermittelt.';
+    document.getElementById('fallback-box').classList.remove('show');
+  } else {
+    document.getElementById('thanks-text').textContent = 'Die direkte Übermittlung hat nicht geklappt – Ihr E-Mail-Programm wurde stattdessen mit einer vorausgefüllten Nachricht geöffnet. Falls sich kein Fenster geöffnet hat, kopieren Sie den Text unten und senden Sie ihn manuell.';
+    document.getElementById('fallback-box').classList.add('show');
+    document.getElementById('fallback-text').value = text;
+    lastMailto = `mailto:${SURVEY_EMAIL}?subject=${encodeURIComponent('Kundenumfrage – Rückmeldung')}&body=${encodeURIComponent(text)}`;
+    window.location.href = lastMailto;
+  }
   return false;
 }
 
