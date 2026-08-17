@@ -138,7 +138,24 @@
   .status-aktiv    { background: #DCFCE7; color: var(--green); }
   .status-entwurf  { background: #FEF3C7; color: var(--orange); }
   .status-abgelaufen { background: #FEE2E2; color: var(--red); }
+  .status-offen       { background: #EFF6FF; color: var(--blue-mid); }
+  .status-bearbeitung { background: #FEF3C7; color: var(--orange); }
+  .status-geloest     { background: #DCFCE7; color: var(--green); }
+  .status-geschlossen { background: #F3F4F6; color: var(--gray); }
   .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* ── Priority badges ── */
+  .prio { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .prio-niedrig  { background: #F3F4F6; color: var(--gray); }
+  .prio-mittel   { background: #EFF6FF; color: var(--blue-mid); }
+  .prio-hoch     { background: #FFFBEB; color: var(--orange); }
+  .prio-dringend { background: #FEE2E2; color: var(--red); }
+
+  /* ── Ticket-Status-Auswahl (Inline) ── */
+  .status-select { border: none; border-radius: 20px; padding: 3px 22px 3px 9px; font-size: 11px; font-weight: 600;
+                    cursor: pointer; appearance: none; -webkit-appearance: none;
+                    background-position: right 6px center; background-repeat: no-repeat; background-size: 10px;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
 
   /* ── Modal ── */
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
@@ -310,6 +327,10 @@
       <div class="nav-item" data-page="umfrageergebnisse" onclick="showPage('umfrageergebnisse')" title="Umfrage-Ergebnisse">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6m-9 0h14a1 1 0 001-1V9.5a1 1 0 00-.29-.71l-5-5a1 1 0 00-1.42 0l-5 5A1 1 0 006 9.5V18a1 1 0 001 1z"/></svg>
         <span class="nav-label">Umfrage-Ergebnisse</span>
+      </div>
+      <div class="nav-item" data-page="tickets" onclick="showPage('tickets')" title="Tickets">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 6h.008v.008H6V6z"/></svg>
+        <span class="nav-label">Tickets</span>
       </div>
       <a class="nav-item" href="umfrage.html" target="_blank" rel="noopener" title="Kundenumfrage öffnen (neuer Tab)">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h3m-3-8h6M5 5h14a1 1 0 011 1v12a1 1 0 01-1 1H8l-4 3V6a1 1 0 011-1z"/></svg>
@@ -485,6 +506,74 @@
         </div>
       </div>
 
+      <!-- ══ TICKETS ══ -->
+      <div class="page" id="page-tickets">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#EFF6FF">
+              <svg fill="none" stroke="#005EB8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/></svg>
+            </div>
+            <div>
+              <div class="stat-label">Offen</div>
+              <div class="stat-value" id="stat-ticket-offen">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#FFFBEB">
+              <svg fill="none" stroke="#D97706" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <div class="stat-label">In Bearbeitung</div>
+              <div class="stat-value" id="stat-ticket-bearbeitung">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#FEE2E2">
+              <svg fill="none" stroke="#DC2626" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+            </div>
+            <div>
+              <div class="stat-label">Dringend &amp; offen</div>
+              <div class="stat-value" id="stat-ticket-dringend">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#F0FDF4">
+              <svg fill="none" stroke="#16A34A" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <div class="stat-label">Gesamt</div>
+              <div class="stat-value" id="stat-ticket-gesamt">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Ticketliste</span>
+            <div class="search-wrap">
+              <span class="search-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span>
+              <input type="text" placeholder="Suchen …" oninput="renderTickets(this.value)" style="width:220px">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="table-fixed">
+              <thead>
+                <tr>
+                  <th style="width:24%">Titel</th>
+                  <th style="width:16%">Kunde</th>
+                  <th style="width:12%">Kategorie</th>
+                  <th style="width:11%">Priorität</th>
+                  <th style="width:14%">Status</th>
+                  <th style="width:10%">Erstellt</th>
+                  <th style="width:13%">Aktionen</th>
+                </tr>
+              </thead>
+              <tbody id="tickets-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <!-- ══ KUNDEN ══ -->
       <div class="page" id="page-kunden">
         <div class="card">
@@ -597,6 +686,56 @@
 </div>
 
 
+<!-- ══ MODAL: NEUES TICKET ══ -->
+<div class="overlay" id="modal-ticket">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-ticket-title">Neues Ticket</span>
+      <button class="close-btn" onclick="closeModal('modal-ticket')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Titel *</label><input id="t-titel" placeholder="Kurze Beschreibung des Anliegens"></div>
+        <div class="form-group full">
+          <label>Kunde</label>
+          <select id="t-kunde"><option value="">– kein Kunde / allgemein –</option></select>
+        </div>
+        <div class="form-group"><label>Kategorie</label>
+          <select id="t-kategorie">
+            <option>Hardware</option>
+            <option>Software</option>
+            <option>Abrechnung</option>
+            <option>Vertrag</option>
+            <option>Sonstiges</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Priorität</label>
+          <select id="t-prioritaet">
+            <option value="niedrig">Niedrig</option>
+            <option value="mittel" selected>Mittel</option>
+            <option value="hoch">Hoch</option>
+            <option value="dringend">Dringend</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>Status</label>
+          <select id="t-status">
+            <option value="offen">Offen</option>
+            <option value="bearbeitung">In Bearbeitung</option>
+            <option value="geloest">Gelöst</option>
+            <option value="geschlossen">Geschlossen</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>Beschreibung</label><textarea id="t-beschreibung" placeholder="Details zum Anliegen …"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-ticket')">Abbrechen</button>
+      <button class="btn btn-primary" onclick="saveTicket()">Speichern</button>
+    </div>
+  </div>
+</div>
+
+
 <!-- ══ MODAL: NEUER VERTRAG ══ -->
 <div class="overlay" id="modal-vertrag">
   <div class="modal" style="max-width:680px">
@@ -694,6 +833,7 @@
     <div class="modal-body" id="umfrage-detail-body"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-umfrage-detail')">Schließen</button>
+      <button class="btn btn-primary" id="umfrage-detail-ticket-btn">🎫 Ticket erstellen</button>
     </div>
   </div>
 </div>
@@ -709,8 +849,10 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let kunden   = [];
 let vertraege= [];
 let umfrageAntworten = [];
+let tickets = [];
 let editingKundeId   = null;
 let editingVertragId = null;
+let editingTicketId  = null;
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
@@ -776,10 +918,11 @@ sb.auth.onAuthStateChange((event, session) => {
 
 // ── Daten laden ──
 async function loadData() {
-  const [{ data: kRows, error: kErr }, { data: vRows, error: vErr }, { data: uRows, error: uErr }] = await Promise.all([
+  const [{ data: kRows, error: kErr }, { data: vRows, error: vErr }, { data: uRows, error: uErr }, { data: tRows, error: tErr }] = await Promise.all([
     sb.from('kunden').select('*').order('created_at'),
     sb.from('vertraege').select('*').order('created_at'),
     sb.from('umfrage_antworten').select('*').order('created_at', { ascending: false }),
+    sb.from('tickets').select('*').order('created_at', { ascending: false }),
   ]);
   if (kErr || vErr) { alert('Fehler beim Laden der Daten: ' + (kErr?.message || vErr?.message)); return; }
   kunden    = (kRows || []).map(r => ({ id: r.id, ...r.data }));
@@ -790,6 +933,13 @@ async function loadData() {
     console.warn('Umfrage-Antworten konnten nicht geladen werden:', uErr.message);
   } else {
     umfrageAntworten = (uRows || []).map(r => ({ id: r.id, created_at: r.created_at, ...r.data }));
+  }
+  if (tErr) {
+    // Tabelle evtl. noch nicht angelegt (siehe supabase/tickets.sql) – Seite bleibt dann leer.
+    tickets = [];
+    console.warn('Tickets konnten nicht geladen werden:', tErr.message);
+  } else {
+    tickets = (tRows || []).map(r => ({ id: r.id, created_at: r.created_at, ...r.data }));
   }
   refreshAll();
 }
@@ -802,6 +952,7 @@ const pageConfig = {
   kunden:     { title: 'Kunden',       badge: 'Kundenliste',  btn: '+ Neuer Kunde' },
   vertraege:  { title: 'Verträge',     badge: 'Vertragsliste',btn: '+ Neuer Vertrag' },
   umfrageergebnisse: { title: 'Umfrage-Ergebnisse', badge: 'Kundenfeedback', btn: null },
+  tickets:    { title: 'Tickets',      badge: 'Support-Tickets', btn: '+ Neues Ticket' },
 };
 
 function showPage(id) {
@@ -846,6 +997,7 @@ if (localStorage.getItem('gtb_sidebar_collapsed') === '1') {
 function openTopbarAction() {
   if (currentPage === 'kunden')    openKundeModal();
   else if (currentPage === 'vertraege') openVertragModal();
+  else if (currentPage === 'tickets') openTicketModal();
   else if (currentPage === 'umfrageergebnisse') return;
   else openVertragModal();
 }
@@ -1256,6 +1408,7 @@ function showUmfrageDetail(id) {
         <p>${esc(a.kontakt_firma) || '–'}${a.kontakt_name?' · '+esc(a.kontakt_name):''}${a.kontakt_email?' · '+esc(a.kontakt_email):''}</p>
       </div>
     </div>`;
+  document.getElementById('umfrage-detail-ticket-btn').onclick = () => createTicketFromUmfrage(id);
   openModal('modal-umfrage-detail');
 }
 
@@ -1265,6 +1418,147 @@ async function deleteUmfrageAntwort(id) {
   if (error) { alert('Fehler beim Löschen: ' + error.message); return; }
   umfrageAntworten = umfrageAntworten.filter(a => a.id !== id);
   refreshAll();
+}
+
+// ══════════════════════════════════════════════════
+//  TICKETS
+// ══════════════════════════════════════════════════
+const TICKET_STATUS_LABELS = { offen: 'Offen', bearbeitung: 'In Bearbeitung', geloest: 'Gelöst', geschlossen: 'Geschlossen' };
+const TICKET_PRIO_LABELS   = { niedrig: 'Niedrig', mittel: 'Mittel', hoch: 'Hoch', dringend: 'Dringend' };
+
+function openTicketModal(id = null, prefill = null) {
+  editingTicketId = id;
+  const sel = document.getElementById('t-kunde');
+  sel.innerHTML = '<option value="">– kein Kunde / allgemein –</option>' + kunden.map(k => `<option value="${k.id}">${esc(k.firma)}</option>`).join('');
+
+  document.getElementById('t-titel').value = '';
+  document.getElementById('t-kunde').value = '';
+  document.getElementById('t-kategorie').value = 'Sonstiges';
+  document.getElementById('t-prioritaet').value = 'mittel';
+  document.getElementById('t-status').value = 'offen';
+  document.getElementById('t-beschreibung').value = '';
+
+  if (id) {
+    const t = tickets.find(x => x.id === id);
+    if (t) {
+      document.getElementById('t-titel').value = t.titel || '';
+      document.getElementById('t-kunde').value = t.kundeId || '';
+      document.getElementById('t-kategorie').value = t.kategorie || 'Sonstiges';
+      document.getElementById('t-prioritaet').value = t.prioritaet || 'mittel';
+      document.getElementById('t-status').value = t.status || 'offen';
+      document.getElementById('t-beschreibung').value = t.beschreibung || '';
+    }
+    document.getElementById('modal-ticket-title').textContent = 'Ticket bearbeiten';
+  } else {
+    document.getElementById('modal-ticket-title').textContent = 'Neues Ticket';
+    if (prefill) {
+      document.getElementById('t-titel').value = prefill.titel || '';
+      document.getElementById('t-kunde').value = prefill.kundeId || '';
+      document.getElementById('t-beschreibung').value = prefill.beschreibung || '';
+    }
+  }
+  openModal('modal-ticket');
+}
+
+async function saveTicket() {
+  const titel = document.getElementById('t-titel').value.trim();
+  if (!titel) { alert('Bitte einen Titel für das Ticket angeben.'); return; }
+  const data = {
+    titel,
+    kundeId:      document.getElementById('t-kunde').value || null,
+    kategorie:    document.getElementById('t-kategorie').value,
+    prioritaet:   document.getElementById('t-prioritaet').value,
+    status:       document.getElementById('t-status').value,
+    beschreibung: document.getElementById('t-beschreibung').value.trim(),
+  };
+  if (editingTicketId) {
+    const idx = tickets.findIndex(x => x.id === editingTicketId);
+    const merged = { ...tickets[idx], ...data };
+    const { error } = await sb.from('tickets').update({ data: merged }).eq('id', editingTicketId);
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return; }
+    tickets[idx] = { id: editingTicketId, created_at: tickets[idx].created_at, ...merged };
+  } else {
+    const { data: inserted, error } = await sb.from('tickets').insert({ data }).select().single();
+    if (error) { alert('Fehler beim Speichern: ' + error.message); return; }
+    tickets.unshift({ id: inserted.id, created_at: inserted.created_at, ...data });
+  }
+  closeModal('modal-ticket'); refreshAll();
+}
+
+async function updateTicketStatus(id, status) {
+  const idx = tickets.findIndex(x => x.id === id);
+  if (idx < 0) return;
+  const merged = { ...tickets[idx], status };
+  const { error } = await sb.from('tickets').update({ data: merged }).eq('id', id);
+  if (error) { alert('Fehler beim Aktualisieren: ' + error.message); refreshAll(); return; }
+  tickets[idx] = { id, created_at: tickets[idx].created_at, ...merged };
+  refreshAll();
+}
+
+async function deleteTicket(id) {
+  if (!confirm('Dieses Ticket wirklich löschen?')) return;
+  const { error } = await sb.from('tickets').delete().eq('id', id);
+  if (error) { alert('Fehler beim Löschen: ' + error.message); return; }
+  tickets = tickets.filter(t => t.id !== id);
+  refreshAll();
+}
+
+function createTicketFromUmfrage(id) {
+  const a = umfrageAntworten.find(x => x.id === id);
+  if (!a) return;
+  const kunde = kunden.find(k => k.email && a.kontakt_email && k.email.toLowerCase() === a.kontakt_email.toLowerCase());
+  const beschreibungTeile = [];
+  if (a.loesungssuche) beschreibungTeile.push('Sucht aktuell noch Lösung für:\n' + a.loesungssuche);
+  if (a.freitext) beschreibungTeile.push('Feedback aus der Umfrage:\n' + a.freitext);
+  closeModal('modal-umfrage-detail');
+  openTicketModal(null, {
+    titel: 'Rückmeldung aus Kundenumfrage' + (a.kontakt_firma ? ' – ' + a.kontakt_firma : ''),
+    kundeId: kunde ? kunde.id : null,
+    beschreibung: beschreibungTeile.join('\n\n') || 'Siehe Umfrage-Antwort im Portal.',
+  });
+}
+
+function renderTickets(filter = '') {
+  const tbody = document.getElementById('tickets-tbody');
+  if (!tbody) return;
+
+  document.getElementById('stat-ticket-offen').textContent = tickets.filter(t => t.status === 'offen').length;
+  document.getElementById('stat-ticket-bearbeitung').textContent = tickets.filter(t => t.status === 'bearbeitung').length;
+  document.getElementById('stat-ticket-dringend').textContent = tickets.filter(t => t.prioritaet === 'dringend' && t.status !== 'geloest' && t.status !== 'geschlossen').length;
+  document.getElementById('stat-ticket-gesamt').textContent = tickets.length;
+
+  let list = tickets;
+  if (filter) {
+    const f = filter.toLowerCase();
+    list = list.filter(t => {
+      const k = kunden.find(x => x.id === t.kundeId);
+      return (t.titel + (k?k.firma:'') + t.kategorie + t.beschreibung).toLowerCase().includes(f);
+    });
+  }
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/></svg>
+      <p>Noch keine Tickets angelegt.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(t => {
+    const k = kunden.find(x => x.id === t.kundeId);
+    const datum = t.created_at ? new Date(t.created_at).toLocaleDateString('de-DE') : '–';
+    const statusOptions = Object.entries(TICKET_STATUS_LABELS).map(([val,label]) =>
+      `<option value="${val}" ${t.status===val?'selected':''}>${label}</option>`).join('');
+    return `<tr>
+      <td><strong>${esc(t.titel)}</strong>${t.beschreibung?`<br><span style="font-size:11px;color:var(--gray)">${esc(t.beschreibung.slice(0,60))}${t.beschreibung.length>60?'…':''}</span>`:''}</td>
+      <td>${k ? esc(k.firma) : '<span style="color:var(--gray)">–</span>'}</td>
+      <td>${esc(t.kategorie||'–')}</td>
+      <td><span class="prio prio-${t.prioritaet||'mittel'}">${TICKET_PRIO_LABELS[t.prioritaet]||'Mittel'}</span></td>
+      <td><select class="status-select status-${t.status||'offen'}" onchange="updateTicketStatus('${t.id}', this.value)">${statusOptions}</select></td>
+      <td>${datum}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-secondary btn-sm" onclick="openTicketModal('${t.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteTicket('${t.id}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════════════
@@ -1655,6 +1949,7 @@ function refreshAll() {
   renderKunden();
   renderVertraege();
   renderUmfrageAntworten();
+  renderTickets();
 }
 
 // ── init: Datenladen erfolgt nach erfolgreichem Login über onAuthStateChange → loadData()
