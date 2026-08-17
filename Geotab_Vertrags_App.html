@@ -295,17 +295,21 @@
       </button>
     </div>
     <nav class="nav">
-      <div class="nav-item active" onclick="showPage('dashboard')" title="Dashboard">
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')" title="Dashboard">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
         <span class="nav-label">Dashboard</span>
       </div>
-      <div class="nav-item" onclick="showPage('kunden')" title="Kunden">
+      <div class="nav-item" data-page="kunden" onclick="showPage('kunden')" title="Kunden">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <span class="nav-label">Kunden</span>
       </div>
-      <div class="nav-item" onclick="showPage('vertraege')" title="Verträge">
+      <div class="nav-item" data-page="vertraege" onclick="showPage('vertraege')" title="Verträge">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
         <span class="nav-label">Verträge</span>
+      </div>
+      <div class="nav-item" data-page="umfrageergebnisse" onclick="showPage('umfrageergebnisse')" title="Umfrage-Ergebnisse">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6m-9 0h14a1 1 0 001-1V9.5a1 1 0 00-.29-.71l-5-5a1 1 0 00-1.42 0l-5 5A1 1 0 006 9.5V18a1 1 0 001 1z"/></svg>
+        <span class="nav-label">Umfrage-Ergebnisse</span>
       </div>
       <a class="nav-item" href="umfrage.html" target="_blank" rel="noopener" title="Kundenumfrage öffnen (neuer Tab)">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h3m-3-8h6M5 5h14a1 1 0 011 1v12a1 1 0 01-1 1H8l-4 3V6a1 1 0 011-1z"/></svg>
@@ -415,11 +419,68 @@
             <a class="btn btn-secondary btn-sm" href="umfrage.html" target="_blank" rel="noopener">Vorschau öffnen</a>
           </div>
           <p style="color:var(--gray);font-size:12.5px;margin-bottom:12px">
-            Schicken Sie Ihren Kunden den Link zur Kundenumfrage – verschiedene Themen (Zufriedenheit, Hardware, Support, Zusatzleistungen u.v.m.) werden abgefragt und die Antworten kommen direkt per E-Mail an Sie.
+            Schicken Sie Ihren Kunden den Link zur Kundenumfrage – verschiedene Themen (Zufriedenheit, Hardware, Support, Zusatzleistungen u.v.m.) werden abgefragt. Die Antworten landen direkt hier im Portal unter „Umfrage-Ergebnisse".
           </p>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <input id="umfrage-link" type="text" readonly style="flex:1;min-width:220px;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-size:12.5px;background:var(--gray-light)">
             <button class="btn btn-primary btn-sm" onclick="copyUmfrageLink()">Link kopieren</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ UMFRAGE-ERGEBNISSE ══ -->
+      <div class="page" id="page-umfrageergebnisse">
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#EFF6FF">
+              <svg fill="none" stroke="#005EB8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6m-9 0h14a1 1 0 001-1V9.5a1 1 0 00-.29-.71l-5-5a1 1 0 00-1.42 0l-5 5A1 1 0 006 9.5V18a1 1 0 001 1z"/></svg>
+            </div>
+            <div>
+              <div class="stat-label">Antworten gesamt</div>
+              <div class="stat-value" id="stat-umfrage-anzahl">0</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#F0FDF4">
+              <svg fill="none" stroke="#16A34A" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <div class="stat-label">Ø Gesamtzufriedenheit</div>
+              <div class="stat-value" id="stat-umfrage-zufriedenheit">–</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background:#FFFBEB">
+              <svg fill="none" stroke="#D97706" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div>
+              <div class="stat-label">Ø Weiterempfehlung (NPS)</div>
+              <div class="stat-value" id="stat-umfrage-nps">–</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Umfrage-Antworten</span>
+            <div class="search-wrap">
+              <span class="search-icon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></span>
+              <input type="text" placeholder="Suchen …" oninput="renderUmfrageAntworten(this.value)" style="width:220px">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="table-fixed">
+              <thead>
+                <tr>
+                  <th style="width:16%">Datum</th>
+                  <th style="width:18%">Zufriedenheit</th>
+                  <th style="width:18%">Weiterempfehlung</th>
+                  <th style="width:36%">Kontakt</th>
+                  <th style="width:12%">Aktionen</th>
+                </tr>
+              </thead>
+              <tbody id="umfrage-tbody"></tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -623,6 +684,20 @@
 </div>
 
 
+<!-- ══ MODAL: UMFRAGE-ANTWORT DETAIL ══ -->
+<div class="overlay" id="modal-umfrage-detail">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header">
+      <span class="modal-title">Umfrage-Antwort</span>
+      <button class="close-btn" onclick="closeModal('modal-umfrage-detail')">✕</button>
+    </div>
+    <div class="modal-body" id="umfrage-detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-umfrage-detail')">Schließen</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════
 //  SUPABASE  (zentrale Datenbank – für alle Browser/Geräte erreichbar)
@@ -633,6 +708,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let kunden   = [];
 let vertraege= [];
+let umfrageAntworten = [];
 let editingKundeId   = null;
 let editingVertragId = null;
 
@@ -700,13 +776,21 @@ sb.auth.onAuthStateChange((event, session) => {
 
 // ── Daten laden ──
 async function loadData() {
-  const [{ data: kRows, error: kErr }, { data: vRows, error: vErr }] = await Promise.all([
+  const [{ data: kRows, error: kErr }, { data: vRows, error: vErr }, { data: uRows, error: uErr }] = await Promise.all([
     sb.from('kunden').select('*').order('created_at'),
     sb.from('vertraege').select('*').order('created_at'),
+    sb.from('umfrage_antworten').select('*').order('created_at', { ascending: false }),
   ]);
   if (kErr || vErr) { alert('Fehler beim Laden der Daten: ' + (kErr?.message || vErr?.message)); return; }
   kunden    = (kRows || []).map(r => ({ id: r.id, ...r.data }));
   vertraege = (vRows || []).map(r => ({ id: r.id, ...r.data }));
+  if (uErr) {
+    // Tabelle evtl. noch nicht angelegt (siehe supabase/umfrage_antworten.sql) – Seite bleibt dann leer.
+    umfrageAntworten = [];
+    console.warn('Umfrage-Antworten konnten nicht geladen werden:', uErr.message);
+  } else {
+    umfrageAntworten = (uRows || []).map(r => ({ id: r.id, created_at: r.created_at, ...r.data }));
+  }
   refreshAll();
 }
 
@@ -717,17 +801,21 @@ const pageConfig = {
   dashboard:  { title: 'Dashboard',    badge: 'Übersicht',    btn: 'Neu' },
   kunden:     { title: 'Kunden',       badge: 'Kundenliste',  btn: '+ Neuer Kunde' },
   vertraege:  { title: 'Verträge',     badge: 'Vertragsliste',btn: '+ Neuer Vertrag' },
+  umfrageergebnisse: { title: 'Umfrage-Ergebnisse', badge: 'Kundenfeedback', btn: null },
 };
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item[data-page]').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
-  document.querySelectorAll('.nav-item')[['dashboard','kunden','vertraege'].indexOf(id)].classList.add('active');
+  const navEl = document.querySelector(`.nav-item[data-page="${id}"]`);
+  if (navEl) navEl.classList.add('active');
   const cfg = pageConfig[id];
   document.getElementById('topbarTitle').textContent = cfg.title;
   document.getElementById('topbarBadge').textContent = cfg.badge;
-  document.getElementById('topbarBtn').lastChild.textContent = ' ' + cfg.btn;
+  const btnEl = document.getElementById('topbarBtn');
+  btnEl.style.display = cfg.btn ? '' : 'none';
+  if (cfg.btn) btnEl.lastChild.textContent = ' ' + cfg.btn;
   currentPage = id;
   refreshAll();
   closeSidebar();
@@ -758,6 +846,7 @@ if (localStorage.getItem('gtb_sidebar_collapsed') === '1') {
 function openTopbarAction() {
   if (currentPage === 'kunden')    openKundeModal();
   else if (currentPage === 'vertraege') openVertragModal();
+  else if (currentPage === 'umfrageergebnisse') return;
   else openVertragModal();
 }
 
@@ -1085,6 +1174,100 @@ function renderVertraege(filter = '') {
       </div></td>
     </tr>`;
   }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  UMFRAGE-ERGEBNISSE
+// ══════════════════════════════════════════════════
+const UMFRAGE_SCALE_LABELS = {
+  gesamtzufriedenheit: 'Gesamtzufriedenheit',
+  hardware_zuverlaessigkeit: 'Zuverlässigkeit Hardware',
+  installation: 'Installation & Inbetriebnahme',
+  mygeotab_bedienung: 'Bedienbarkeit MyGeotab',
+  support_reaktionszeit: 'Reaktionszeit Support',
+  support_kompetenz: 'Kompetenz Support',
+  vertrag_verstaendlich: 'Verständlichkeit Vertrag/Rechnung',
+  erreichbarkeit: 'Erreichbarkeit',
+};
+
+function renderUmfrageAntworten(filter = '') {
+  const tbody = document.getElementById('umfrage-tbody');
+  if (!tbody) return;
+
+  const anzahl = umfrageAntworten.length;
+  const avg = key => {
+    const vals = umfrageAntworten.map(a => a[key]).filter(v => v !== null && v !== undefined);
+    return vals.length ? (vals.reduce((s,v)=>s+v,0) / vals.length) : null;
+  };
+  const statAnzahl = document.getElementById('stat-umfrage-anzahl');
+  const statZuf = document.getElementById('stat-umfrage-zufriedenheit');
+  const statNps = document.getElementById('stat-umfrage-nps');
+  if (statAnzahl) statAnzahl.textContent = anzahl;
+  if (statZuf) { const v = avg('gesamtzufriedenheit'); statZuf.textContent = v !== null ? v.toFixed(1) + ' / 5' : '–'; }
+  if (statNps) { const v = avg('nps'); statNps.textContent = v !== null ? v.toFixed(1) + ' / 10' : '–'; }
+
+  let list = umfrageAntworten;
+  if (filter) {
+    const f = filter.toLowerCase();
+    list = list.filter(a => (a.kontakt_firma+a.kontakt_name+a.kontakt_email+a.freitext).toLowerCase().includes(f));
+  }
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 012-2h2a2 2 0 012 2v6m-9 0h14a1 1 0 001-1V9.5a1 1 0 00-.29-.71l-5-5a1 1 0 00-1.42 0l-5 5A1 1 0 006 9.5V18a1 1 0 001 1z"/></svg>
+      <p>Noch keine Umfrage-Antworten eingegangen.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(a => {
+    const datum = a.created_at ? new Date(a.created_at).toLocaleDateString('de-DE') : '–';
+    const kontakt = a.kontakt_firma || a.kontakt_name
+      ? `<strong>${esc(a.kontakt_firma||'–')}</strong>${a.kontakt_name?`<br><span style="font-size:11px;color:var(--gray)">${esc(a.kontakt_name)}</span>`:''}`
+      : `<span style="color:var(--gray)">anonym</span>`;
+    return `<tr>
+      <td>${datum}</td>
+      <td>${a.gesamtzufriedenheit!=null ? a.gesamtzufriedenheit+' / 5' : '–'}</td>
+      <td>${a.nps!=null ? a.nps+' / 10' : '–'}</td>
+      <td>${kontakt}</td>
+      <td><div class="td-actions">
+        <button class="btn btn-secondary btn-sm" title="Details" onclick="showUmfrageDetail('${a.id}')">👁</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteUmfrageAntwort('${a.id}')">🗑</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function showUmfrageDetail(id) {
+  const a = umfrageAntworten.find(x => x.id === id);
+  if (!a) return;
+  const datum = a.created_at ? new Date(a.created_at).toLocaleString('de-DE') : '–';
+  const scaleRows = Object.entries(UMFRAGE_SCALE_LABELS).map(([key,label]) =>
+    `<tr><td style="color:var(--gray)">${label}</td><td style="text-align:right"><strong>${a[key]!=null ? a[key]+' / 5' : '–'}</strong></td></tr>`
+  ).join('');
+  const list = (arr) => arr && arr.length ? arr.map(esc).join(', ') : '–';
+  document.getElementById('umfrage-detail-body').innerHTML = `
+    <p style="color:var(--gray);font-size:12px;margin-bottom:14px">Eingegangen am ${datum}</p>
+    <table class="sum-table" style="margin-bottom:14px">
+      <tbody>${scaleRows}
+        <tr><td style="color:var(--gray)">Weiterempfehlung (NPS)</td><td style="text-align:right"><strong>${a.nps!=null ? a.nps+' / 10' : '–'}</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="form-grid">
+      <div class="form-group full"><label>Nutzung mobile App (Geotab Drive)</label><p>${esc(a.app_nutzung || '–')}</p></div>
+      <div class="form-group full"><label>Meistgenutzte Funktionen</label><p>${list(a.funktionen)}</p></div>
+      <div class="form-group full"><label>Interesse an Zusatzleistungen</label><p>${list(a.zusatzleistungen)}</p></div>
+      <div class="form-group full"><label>Feedback / Anmerkungen</label><p>${esc(a.freitext) || '<span style="color:var(--gray)">– keine Angabe –</span>'}</p></div>
+      <div class="form-group full"><label>Kontakt</label>
+        <p>${esc(a.kontakt_firma) || '–'}${a.kontakt_name?' · '+esc(a.kontakt_name):''}${a.kontakt_email?' · '+esc(a.kontakt_email):''}</p>
+      </div>
+    </div>`;
+  openModal('modal-umfrage-detail');
+}
+
+async function deleteUmfrageAntwort(id) {
+  if (!confirm('Diese Umfrage-Antwort wirklich löschen?')) return;
+  const { error } = await sb.from('umfrage_antworten').delete().eq('id', id);
+  if (error) { alert('Fehler beim Löschen: ' + error.message); return; }
+  umfrageAntworten = umfrageAntworten.filter(a => a.id !== id);
+  refreshAll();
 }
 
 // ══════════════════════════════════════════════════
@@ -1474,6 +1657,7 @@ function refreshAll() {
   renderDashboard();
   renderKunden();
   renderVertraege();
+  renderUmfrageAntworten();
 }
 
 // ── init: Datenladen erfolgt nach erfolgreichem Login über onAuthStateChange → loadData()
